@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Dự báo Cổ phiếu Việt Nam{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-tachometer-alt me-2"></i>
+                        Dashboard Tổng quan
+                    </h4>
+                    <div>
+                        <button class="btn btn-primary" onclick="refreshData()">
+                            <i class="fas fa-sync-alt me-2"></i>Cập nhật dữ liệu
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-0">
+                    Tổng quan dự báo tất cả cổ phiếu - Cập nhật: <strong>{{ current_date }}</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading State -->
+<div id="loadingState" class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+                <p class="mt-3">Đang tải dữ liệu và dự báo...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics -->
+<div id="statisticsRow" class="row mb-4" style="display: none;">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-arrow-up fa-2x text-success mb-3"></i>
+                <h3 id="upCount" class="text-success">-</h3>
+                <p class="text-muted mb-0">Dự báo TĂNG</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-arrow-right fa-2x text-warning mb-3"></i>
+                <h3 id="sidewayCount" class="text-warning">-</h3>
+                <p class="text-muted mb-0">Dự báo SIDEWAY</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-arrow-down fa-2x text-danger mb-3"></i>
+                <h3 id="downCount" class="text-danger">-</h3>
+                <p class="text-muted mb-0">Dự báo GIẢM</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-chart-line fa-2x text-primary mb-3"></i>
+                <h3 id="avgChange" class="text-primary">-</h3>
+                <p class="text-muted mb-0">Thay đổi TB</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stocks Grid -->
+<div id="stocksGrid" class="row" style="display: none;">
+    <!-- Stocks will be loaded here -->
+</div>
+
+<!-- Error State -->
+<div id="errorState" class="row" style="display: none;">
+    <div class="col-12">
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Lỗi:</strong> Không thể tải dữ liệu. Vui lòng kiểm tra kết nối và thử lại.
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let stocksData = [];
+
+// Function to refresh data
+function refreshData() {
+    showLoading();
+    loadStocksData();
+}
+
+// Show loading state
+function showLoading() {
+    $('#loadingState').show();
+    $('#statisticsRow').hide();
+    $('#stocksGrid').hide();
+    $('#errorState').hide();
+}
+
+// Show error state
+function showError() {
+    $('#loadingState').hide();
+    $('#statisticsRow').hide();
+    $('#stocksGrid').hide();
+    $('#errorState').show();
+}
+
+// Load stocks data from API
+function loadStocksData() {
+    $.get('/api/stocks')
+        .done(function(response) {
+            if (response.success) {
+                stocksData = response.data;
+                updateStatistics();
+                renderStocksGrid();
+
+                $('#loadingState').hide();
+                $('#statisticsRow').show();
+                $('#stocksGrid').show();
+            } else {
+                console.error('API Error:', response.message);
+                showError();
+            }
+        })
+        .fail(function(xhr, status, error) {
+            console.error('Request failed:', error);
+            showError();
+        });
+}
+
+// Update statistics
+function updateStatistics() {
+    let upCount = 0;
+    let sidewayCount = 0;
+    let downCount = 0;
+    let totalChange = 0;
+    let maxChange = -999;
+    let topGainer = '';
+
+    stocksData.forEach(stock => {
+        if (stock.trend === 'TĂNG') {
+            upCount++;
+        } else if (stock.trend === 'SIDEWAY') {
+            sidewayCount++;
+        } else {
+            downCount++;
+        }
+
+        totalChange += stock.price_change_percent;
+
+        if (stock.price_change_percent > maxChange) {
+            maxChange = stock.price_change_percent;
+            topGainer = stock.symbol;
+        }
+    });
+
+    const avgChange = totalChange / stocksData.length;
+
+    $('#upCount').text(upCount);
+    $('#sidewayCount').text(sidewayCount);
+    $('#downCount').text(downCount);
+    $('#avgChange').text((avgChange >= 0 ? '+' : '') + avgChange.toFixed(2) + '%');
+}
+
+// Render stocks grid
+function renderStocksGrid() {
+    const grid = $('#stocksGrid');
+    grid.empty();
+
+    // Sort stocks by prediction percentage
+    stocksData.sort((a, b) => b.price_change_percent - a.price_change_percent);
+
+    stocksData.forEach(stock => {
+        const cardHtml = `
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card stock-card h-100" onclick="window.location.href='/stock/${stock.symbol}'">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h5 class="mb-0">${stock.symbol}</h5>
+                                <small class="text-muted">${stock.name}</small>
+                            </div>
+                            <span class="fs-1">${stock.trend_icon}</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">Hiện tại</small>
+                                <strong>${stock.current_price.toLocaleString()} VND</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">Dự báo</small>
+                                <strong class="text-${stock.trend_color}">
+                                    ${stock.predicted_price.toLocaleString()} VND
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="badge bg-${stock.trend_color} fs-6">
+                                ${stock.trend}
+                            </span>
+                            <div class="text-${stock.trend_color} fw-bold">
+                                ${stock.price_change >= 0 ? '+' : ''}${stock.price_change.toLocaleString()} VND
+                                <br>
+                                <small>(${stock.price_change_percent >= 0 ? '+' : ''}${stock.price_change_percent.toFixed(2)}%)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        grid.append(cardHtml);
+    });
+}
+
+// Load data on page ready
+$(document).ready(function() {
+    {% if model_loaded %}
+        loadStocksData();
+    {% else %}
+        showError();
+        $('#errorState .alert').html(`
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Mô hình chưa sẵn sàng:</strong> Vui lòng huấn luyện mô hình trước khi sử dụng dashboard.
+            <br><br>
+            <a href="/" class="btn btn-primary">Quay về trang chủ</a>
+        `);
+    {% endif %}
+});
+
+// Auto refresh every 5 minutes
+setInterval(function() {
+    if ($('#stocksGrid').is(':visible')) {
+        loadStocksData();
+    }
+}, 5 * 60 * 1000);
+</script>
+{% endblock %}
