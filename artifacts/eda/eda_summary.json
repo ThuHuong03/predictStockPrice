@@ -1,0 +1,250 @@
+{
+  "data_quality": {
+    "missing_before": 0,
+    "missing_after": 0,
+    "outlier_replacements": {
+      "open": 468,
+      "high": 458,
+      "low": 452,
+      "close": 465
+    },
+    "symbols": [
+      "VIC",
+      "HDB",
+      "MBB",
+      "VHM",
+      "STB",
+      "FPT",
+      "ACB",
+      "CTG",
+      "VJC",
+      "TCB"
+    ],
+    "rows": 10773
+  },
+  "descriptive_stats": {
+    "open": {
+      "count": 10773.0,
+      "mean": 37840.50438,
+      "std": 32820.381175,
+      "min": 7000.417297,
+      "25%": 16038.245117,
+      "50%": 24000.0,
+      "75%": 47200.0,
+      "max": 173375.0,
+      "median": 24000.0,
+      "skew": 1.780169,
+      "kurtosis": 2.808563
+    },
+    "high": {
+      "count": 10773.0,
+      "mean": 38331.05044,
+      "std": 33344.736056,
+      "min": 7603.449219,
+      "25%": 16202.679318,
+      "50%": 24257.812616,
+      "75%": 47700.0,
+      "max": 178750.0,
+      "median": 24257.812616,
+      "skew": 1.801159,
+      "kurtosis": 2.957098
+    },
+    "low": {
+      "count": 10773.0,
+      "mean": 37334.170476,
+      "std": 32334.156651,
+      "min": 6843.104374,
+      "25%": 15844.788086,
+      "50%": 23700.0,
+      "75%": 46500.0,
+      "max": 171800.0,
+      "median": 23700.0,
+      "skew": 1.779135,
+      "kurtosis": 2.81033
+    },
+    "close": {
+      "count": 10773.0,
+      "mean": 37838.529396,
+      "std": 32842.115645,
+      "min": 7341.26123,
+      "25%": 16023.336914,
+      "50%": 23950.925781,
+      "75%": 47159.699219,
+      "max": 173587.5,
+      "median": 23950.925781,
+      "skew": 1.784308,
+      "kurtosis": 2.835096
+    },
+    "volume": {
+      "count": 10773.0,
+      "mean": 14081554.810266,
+      "std": 14252623.864237,
+      "min": 336111.0,
+      "25%": 5305406.0,
+      "50%": 10277250.0,
+      "75%": 17868878.0,
+      "max": 308171600.0,
+      "median": 10277250.0,
+      "skew": 4.214996,
+      "kurtosis": 45.140409
+    },
+    "daily_return": {
+      "count": 10763.0,
+      "mean": 0.000849,
+      "std": 0.01944,
+      "min": -0.07,
+      "25%": -0.007638,
+      "50%": 0.0,
+      "75%": 0.008662,
+      "max": 0.07,
+      "median": 0.0,
+      "skew": 0.122404,
+      "kurtosis": 3.172355
+    },
+    "log_return": {
+      "count": 10763.0,
+      "mean": 0.00066,
+      "std": 0.01942,
+      "min": -0.072571,
+      "25%": -0.007668,
+      "50%": 0.0,
+      "75%": 0.008624,
+      "max": 0.067659,
+      "median": 0.0,
+      "skew": -0.02857,
+      "kurtosis": 3.207376
+    }
+  },
+  "per_symbol_daily_return": {
+    "VHM": {
+      "mean": 0.001693,
+      "median": 0.0,
+      "std": 0.025623,
+      "min": -0.07,
+      "max": 0.07
+    },
+    "STB": {
+      "mean": 0.001467,
+      "median": 0.001531,
+      "std": 0.020845,
+      "min": -0.069519,
+      "max": 0.069692
+    },
+    "HDB": {
+      "mean": 0.001063,
+      "median": 0.0,
+      "std": 0.01981,
+      "min": -0.069712,
+      "max": 0.07
+    },
+    "VJC": {
+      "mean": 0.000996,
+      "median": 0.0,
+      "std": 0.017032,
+      "min": -0.069474,
+      "max": 0.069872
+    },
+    "MBB": {
+      "mean": 0.000855,
+      "median": 0.0,
+      "std": 0.017915,
+      "min": -0.069815,
+      "max": 0.069204
+    },
+    "FPT": {
+      "mean": 0.000704,
+      "median": 0.0,
+      "std": 0.017671,
+      "min": -0.069911,
+      "max": 0.069743
+    },
+    "TCB": {
+      "mean": 0.000679,
+      "median": 0.0,
+      "std": 0.0204,
+      "min": -0.069966,
+      "max": 0.069915
+    },
+    "CTG": {
+      "mean": 0.000675,
+      "median": 0.0,
+      "std": 0.019845,
+      "min": -0.069767,
+      "max": 0.069915
+    },
+    "ACB": {
+      "mean": 0.00063,
+      "median": 0.0,
+      "std": 0.016953,
+      "min": -0.069602,
+      "max": 0.069388
+    },
+    "VIC": {
+      "mean": 0.000461,
+      "median": 0.0,
+      "std": 0.019741,
+      "min": -0.07,
+      "max": 0.07
+    }
+  },
+  "correlation_matrix": {
+    "open": {
+      "open": 1.0,
+      "high": 0.9998,
+      "low": 0.9998,
+      "close": 0.9996,
+      "volume": -0.3176,
+      "daily_return": 0.0034
+    },
+    "high": {
+      "open": 0.9998,
+      "high": 1.0,
+      "low": 0.9997,
+      "close": 0.9998,
+      "volume": -0.3146,
+      "daily_return": 0.0129
+    },
+    "low": {
+      "open": 0.9998,
+      "high": 0.9997,
+      "low": 1.0,
+      "close": 0.9997,
+      "volume": -0.3191,
+      "daily_return": 0.0111
+    },
+    "close": {
+      "open": 0.9996,
+      "high": 0.9998,
+      "low": 0.9997,
+      "close": 1.0,
+      "volume": -0.3169,
+      "daily_return": 0.022
+    },
+    "volume": {
+      "open": -0.3176,
+      "high": -0.3146,
+      "low": -0.3191,
+      "close": -0.3169,
+      "volume": 1.0,
+      "daily_return": 0.0397
+    },
+    "daily_return": {
+      "open": 0.0034,
+      "high": 0.0129,
+      "low": 0.0111,
+      "close": 0.022,
+      "volume": 0.0397,
+      "daily_return": 1.0
+    }
+  },
+  "plots": {
+    "histogram": "artifacts\\eda\\histogram_daily_return.png",
+    "boxplot": "artifacts\\eda\\boxplot_daily_return_by_symbol.png",
+    "correlation_matrix": "artifacts\\eda\\correlation_matrix.png"
+  },
+  "comments": [
+    "Daily return skew=0.122, std=0.0194, cho thấy mức lệch/phân tán rõ.",
+    "Mã có mean return cao nhất: VHM; thấp nhất: VIC.",
+    "Tương quan close-volume: -0.317."
+  ]
+}

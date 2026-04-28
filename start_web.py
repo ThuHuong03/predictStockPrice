@@ -12,10 +12,11 @@ from pathlib import Path
 CURRENT_DIR = Path(__file__).parent
 MODEL_PATH = CURRENT_DIR / "stock_model.joblib"
 SCALER_PATH = CURRENT_DIR / "scaler.joblib"
+BUNDLE_PATH = CURRENT_DIR / "analysis_bundle.joblib"
 
 def check_model_exists():
     """Kiểm tra xem mô hình đã được huấn luyện chưa"""
-    return MODEL_PATH.exists() and SCALER_PATH.exists()
+    return MODEL_PATH.exists() and SCALER_PATH.exists() and BUNDLE_PATH.exists()
 
 def train_model():
     """Huấn luyện mô hình mới"""
@@ -75,6 +76,7 @@ def main():
         print("✅ Tìm thấy mô hình đã huấn luyện")
         print(f"   - Model: {MODEL_PATH}")
         print(f"   - Scaler: {SCALER_PATH}")
+        print(f"   - Bundle: {BUNDLE_PATH}")
         start_web_app()
     else:
         print("⚠️  Không tìm thấy mô hình đã huấn luyện")

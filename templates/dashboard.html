@@ -1,99 +1,165 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - Dự báo Cổ phiếu Việt Nam{% endblock %}
+{% block title %}Dashboard so sánh model{% endblock %}
 
 {% block content %}
-<!-- Header -->
 <div class="row mb-4">
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">
-                        <i class="fas fa-tachometer-alt me-2"></i>
-                        Dashboard Tổng quan
-                    </h4>
-                    <div>
-                        <button class="btn btn-primary" onclick="refreshData()">
-                            <i class="fas fa-sync-alt me-2"></i>Cập nhật dữ liệu
-                        </button>
-                    </div>
-                </div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-scale-balanced me-2"></i>So sánh Econometric vs Machine Learning</h4>
+                <button class="btn btn-primary" onclick="refreshData()">
+                    <i class="fas fa-sync-alt me-2"></i>Cập nhật dữ liệu
+                </button>
             </div>
             <div class="card-body">
-                <p class="text-muted mb-0">
-                    Tổng quan dự báo tất cả cổ phiếu - Cập nhật: <strong>{{ current_date }}</strong>
-                </p>
+                <p class="text-muted mb-0">Dữ liệu cập nhật: <strong>{{ current_date }}</strong> | Top 10 mã VN30 theo hiệu suất 5 năm.</p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Loading State -->
 <div id="loadingState" class="row">
     <div class="col-12">
         <div class="card">
             <div class="card-body text-center">
-                <div class="loading">
-                    <div class="spinner"></div>
+                <div class="loading"><div class="spinner"></div></div>
+                <p class="mt-3">Đang tải dữ liệu dashboard...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="dashboardContent" style="display: none;">
+    <div id="statisticsRow" class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center"><div class="card-body">
+                <h3 id="upCount" class="text-success">-</h3><p class="text-muted mb-0">Dự báo TĂNG</p>
+            </div></div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center"><div class="card-body">
+                <h3 id="sidewayCount" class="text-warning">-</h3><p class="text-muted mb-0">Dự báo SIDEWAY</p>
+            </div></div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center"><div class="card-body">
+                <h3 id="downCount" class="text-danger">-</h3><p class="text-muted mb-0">Dự báo GIẢM</p>
+            </div></div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center"><div class="card-body">
+                <h3 id="avgChange" class="text-primary">-</h3><p class="text-muted mb-0">Mức thay đổi giả định</p>
+            </div></div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header"><h5 class="mb-0"><i class="fas fa-ranking-star me-2"></i>Bảng xếp hạng model</h5></div>
+                <div class="card-body table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Nhóm</th>
+                                <th>Model</th>
+                                <th>Accuracy</th>
+                                <th>Precision</th>
+                                <th>F1</th>
+                                <th>ROC-AUC</th>
+                            </tr>
+                        </thead>
+                        <tbody id="benchmarkTableBody"></tbody>
+                    </table>
                 </div>
-                <p class="mt-3">Đang tải dữ liệu và dự báo...</p>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header"><h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Model tốt nhất</h5></div>
+                <div class="card-body">
+                    <h4 id="bestModelName" class="text-primary mb-1">-</h4>
+                    <p class="text-muted mb-2" id="bestModelGroup">-</p>
+                    <div class="small">
+                        <div>Accuracy: <strong id="bestModelAcc">-</strong></div>
+                        <div>F1: <strong id="bestModelF1">-</strong></div>
+                        <div>Precision: <strong id="bestModelPrecision">-</strong></div>
+                    </div>
+                    <hr>
+                    <h6>Top 10 theo hiệu suất 5 năm</h6>
+                    <ul id="topPerformanceList" class="small mb-0"></ul>
+                </div>
             </div>
         </div>
     </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header"><h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Nhận xét EDA</h5></div>
+                <div class="card-body">
+                    <ul id="edaCommentList" class="mb-3"></ul>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <img id="edaHistogram" class="img-fluid rounded border" alt="Histogram">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <img id="edaBoxplot" class="img-fluid rounded border" alt="Boxplot">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <img id="edaCorr" class="img-fluid rounded border" alt="Correlation Matrix">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header"><h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Data significance checks</h5></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="mb-2">ML checks</h6>
+                            <ul id="mlCheckList" class="small mb-0"></ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="mb-2">Econometric checks</h6>
+                            <ul id="econCheckList" class="small mb-0"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header"><h5 class="mb-0"><i class="fas fa-list-check me-2"></i>Benchmark checklist (đạt/chưa đạt)</h5></div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Trạng thái tổng</h6>
+                        <span id="checklistOverallBadge" class="badge bg-secondary">N/A</span>
+                    </div>
+                    <div class="small text-muted mb-3" id="checklistMeta"></div>
+                    <ul id="benchmarkChecklistList" class="small mb-0"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="stocksGrid" class="row"></div>
 </div>
 
-<!-- Statistics -->
-<div id="statisticsRow" class="row mb-4" style="display: none;">
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-arrow-up fa-2x text-success mb-3"></i>
-                <h3 id="upCount" class="text-success">-</h3>
-                <p class="text-muted mb-0">Dự báo TĂNG</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-arrow-right fa-2x text-warning mb-3"></i>
-                <h3 id="sidewayCount" class="text-warning">-</h3>
-                <p class="text-muted mb-0">Dự báo SIDEWAY</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-arrow-down fa-2x text-danger mb-3"></i>
-                <h3 id="downCount" class="text-danger">-</h3>
-                <p class="text-muted mb-0">Dự báo GIẢM</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <i class="fas fa-chart-line fa-2x text-primary mb-3"></i>
-                <h3 id="avgChange" class="text-primary">-</h3>
-                <p class="text-muted mb-0">Thay đổi TB</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Stocks Grid -->
-<div id="stocksGrid" class="row" style="display: none;">
-    <!-- Stocks will be loaded here -->
-</div>
-
-<!-- Error State -->
 <div id="errorState" class="row" style="display: none;">
     <div class="col-12">
         <div class="alert alert-danger">
             <i class="fas fa-exclamation-triangle me-2"></i>
-            <strong>Lỗi:</strong> Không thể tải dữ liệu. Vui lòng kiểm tra kết nối và thử lại.
+            <strong>Lỗi:</strong> Không thể tải dữ liệu dashboard.
         </div>
     </div>
 </div>
@@ -102,96 +168,217 @@
 {% block extra_js %}
 <script>
 let stocksData = [];
+let benchmarkData = {};
+let edaData = {};
+let topPerformance = [];
 
-// Function to refresh data
-function refreshData() {
-    showLoading();
-    loadStocksData();
-}
-
-// Show loading state
 function showLoading() {
     $('#loadingState').show();
-    $('#statisticsRow').hide();
-    $('#stocksGrid').hide();
+    $('#dashboardContent').hide();
     $('#errorState').hide();
 }
 
-// Show error state
-function showError() {
+function showError(message) {
     $('#loadingState').hide();
-    $('#statisticsRow').hide();
-    $('#stocksGrid').hide();
+    $('#dashboardContent').hide();
     $('#errorState').show();
+    if (message) {
+        $('#errorState .alert').append(`<div class="mt-2 small">${message}</div>`);
+    }
 }
 
-// Load stocks data from API
-function loadStocksData() {
-    $.get('/api/stocks')
-        .done(function(response) {
-            if (response.success) {
-                stocksData = response.data;
-                updateStatistics();
-                renderStocksGrid();
-
-                $('#loadingState').hide();
-                $('#statisticsRow').show();
-                $('#stocksGrid').show();
-            } else {
-                console.error('API Error:', response.message);
-                showError();
-            }
-        })
-        .fail(function(xhr, status, error) {
-            console.error('Request failed:', error);
-            showError();
-        });
+function refreshData() {
+    showLoading();
+    $.get('/api/refresh').always(loadDashboardData);
 }
 
-// Update statistics
+function loadDashboardData() {
+    $.when(
+        $.get('/api/stocks'),
+        $.get('/api/benchmark'),
+        $.get('/api/eda'),
+        $.get('/api/top10-performance')
+    ).done(function(stocksResp, benchmarkResp, edaResp, perfResp) {
+        stocksData = stocksResp[0].data || [];
+        benchmarkData = benchmarkResp[0].data || {};
+        edaData = edaResp[0].data || {};
+        topPerformance = perfResp[0].data || [];
+
+        updateStatistics();
+        renderStocksGrid();
+        renderBenchmarkTable();
+        renderBestModel();
+        renderTopPerformance();
+        renderEDA();
+        renderDataChecks();
+        renderBenchmarkChecklist();
+
+        $('#loadingState').hide();
+        $('#dashboardContent').show();
+    }).fail(function() {
+        showError('Không thể tải đủ dữ liệu từ API.');
+    });
+}
+
 function updateStatistics() {
     let upCount = 0;
     let sidewayCount = 0;
     let downCount = 0;
     let totalChange = 0;
-    let maxChange = -999;
-    let topGainer = '';
-
     stocksData.forEach(stock => {
-        if (stock.trend === 'TĂNG') {
-            upCount++;
-        } else if (stock.trend === 'SIDEWAY') {
-            sidewayCount++;
-        } else {
-            downCount++;
-        }
-
-        totalChange += stock.price_change_percent;
-
-        if (stock.price_change_percent > maxChange) {
-            maxChange = stock.price_change_percent;
-            topGainer = stock.symbol;
-        }
+        if (stock.trend === 'TĂNG') upCount++;
+        else if (stock.trend === 'SIDEWAY') sidewayCount++;
+        else downCount++;
+        totalChange += stock.price_change_percent || 0;
     });
-
-    const avgChange = totalChange / stocksData.length;
-
+    const avgChange = stocksData.length ? totalChange / stocksData.length : 0;
     $('#upCount').text(upCount);
     $('#sidewayCount').text(sidewayCount);
     $('#downCount').text(downCount);
-    $('#avgChange').text((avgChange >= 0 ? '+' : '') + avgChange.toFixed(2) + '%');
+    $('#avgChange').text(`${avgChange >= 0 ? '+' : ''}${avgChange.toFixed(2)}%`);
 }
 
-// Render stocks grid
+function renderBenchmarkTable() {
+    const tbody = $('#benchmarkTableBody');
+    tbody.empty();
+    const ranking = benchmarkData.ranking || [];
+    ranking.forEach(row => {
+        const modelLabel = row.model_variant || row.model_name || '-';
+        tbody.append(`
+            <tr>
+                <td>${row.model_group || '-'}</td>
+                <td><strong>${modelLabel}</strong></td>
+                <td>${formatMetric(row.accuracy)}</td>
+                <td>${formatMetric(row.precision_weighted)}</td>
+                <td>${formatMetric(row.f1_weighted)}</td>
+                <td>${formatMetric(row.roc_auc_ovr_weighted)}</td>
+            </tr>
+        `);
+    });
+}
+
+function renderBestModel() {
+    const top = benchmarkData.top_model || {};
+    $('#bestModelName').text(top.model_name || '-');
+    $('#bestModelGroup').text(top.model_group || '-');
+    $('#bestModelAcc').text(formatMetric(top.accuracy));
+    $('#bestModelF1').text(formatMetric(top.f1_weighted));
+    $('#bestModelPrecision').text(formatMetric(top.precision_weighted));
+}
+
+function renderTopPerformance() {
+    const list = $('#topPerformanceList');
+    list.empty();
+    topPerformance.slice(0, 10).forEach(row => {
+        const displayRank = row.top10_rank || row.rank || '-';
+        list.append(`<li>${displayRank}. ${row.symbol}: ${Number(row.return_5y_pct).toFixed(2)}%</li>`);
+    });
+}
+
+function renderEDA() {
+    const comments = edaData.comments || [];
+    const commentList = $('#edaCommentList');
+    commentList.empty();
+    comments.forEach(c => commentList.append(`<li>${c}</li>`));
+
+    const plots = edaData.plots || {};
+    $('#edaHistogram').attr('src', `/${plots.histogram || ''}`);
+    $('#edaBoxplot').attr('src', `/${plots.boxplot || ''}`);
+    $('#edaCorr').attr('src', `/${plots.correlation_matrix || ''}`);
+}
+
+function renderDataChecks() {
+    const checks = benchmarkData.data_significance_checks || {};
+    const ml = checks.ml || {};
+    const econ = checks.econometric || {};
+    const mlList = $('#mlCheckList');
+    const econList = $('#econCheckList');
+    mlList.empty();
+    econList.empty();
+
+    if (ml.passed === true) {
+        mlList.append('<li class="text-success">ML checks passed.</li>');
+    } else if (ml.passed === false) {
+        mlList.append('<li class="text-danger">ML checks failed.</li>');
+    } else {
+        mlList.append('<li>ML checks chưa có dữ liệu.</li>');
+    }
+    (ml.errors || []).forEach(msg => mlList.append(`<li class="text-danger">${msg}</li>`));
+    (ml.warnings || []).forEach(msg => mlList.append(`<li class="text-warning">${msg}</li>`));
+
+    const symbols = Object.keys(econ);
+    if (!symbols.length) {
+        econList.append('<li>Econometric checks chưa có dữ liệu.</li>');
+        return;
+    }
+    const passedCount = symbols.filter(s => econ[s].passed).length;
+    econList.append(`<li class="text-success">${passedCount}/${symbols.length} mã đạt điều kiện econometric.</li>`);
+    symbols.slice(0, 5).forEach(symbol => {
+        const item = econ[symbol];
+        const color = item.passed ? 'text-success' : 'text-danger';
+        econList.append(`<li class="${color}">${symbol}: ${item.passed ? 'passed' : 'failed'}</li>`);
+    });
+}
+
+function renderBenchmarkChecklist() {
+    const checklist = benchmarkData.benchmark_checklist || {};
+    const items = checklist.items || {};
+    const list = $('#benchmarkChecklistList');
+    list.empty();
+
+    const overallBadge = $('#checklistOverallBadge');
+    const overall = checklist.overall_passed;
+    if (overall === true) {
+        overallBadge.attr('class', 'badge bg-success').text('ĐẠT');
+    } else if (overall === false) {
+        overallBadge.attr('class', 'badge bg-danger').text('CHƯA ĐẠT');
+    } else {
+        overallBadge.attr('class', 'badge bg-secondary').text('N/A');
+    }
+
+    const bestModel = checklist.best_ml_model || '-';
+    const sampleSize = checklist.sample_size || '-';
+    $('#checklistMeta').text(`Model ML đánh giá: ${bestModel} | Test samples: ${sampleSize}`);
+
+    const labels = {
+        walk_forward_cv: 'Walk-forward CV',
+        baseline_comparison: 'So baseline',
+        regime_analysis: 'Theo từng regime',
+        confidence_calibration: 'Confidence calibration',
+        paper_trading: 'Paper trading (PnL/Sharpe/MDD)'
+    };
+
+    Object.keys(labels).forEach(key => {
+        const item = items[key];
+        if (!item) {
+            list.append(`<li>${labels[key]}: chưa có dữ liệu</li>`);
+            return;
+        }
+        const passed = item.passed === true;
+        const color = passed ? 'text-success' : 'text-danger';
+        let detail = '';
+        if (key === 'walk_forward_cv') {
+            detail = `mean_acc=${formatMetric(item.mean_accuracy)} | folds=${item.folds || 0}`;
+        } else if (key === 'baseline_comparison') {
+            detail = `ΔF1=${formatMetric(item.f1_improvement_vs_baseline)} (ngưỡng ${formatMetric(item.threshold)})`;
+        } else if (key === 'regime_analysis') {
+            detail = `macro_f1=${formatMetric(item.macro_f1)} (ngưỡng ${formatMetric(item.threshold)})`;
+        } else if (key === 'confidence_calibration') {
+            detail = `ECE=${formatMetric(item.ece)} (max ${formatMetric(item.max_ece_threshold)})`;
+        } else if (key === 'paper_trading') {
+            detail = `return=${formatMetric(item.total_return)} | sharpe=${formatMetric(item.sharpe)} | mdd=${formatMetric(item.max_drawdown)}`;
+        }
+        list.append(`<li class="${color}">${labels[key]}: ${passed ? 'ĐẠT' : 'CHƯA ĐẠT'} - ${detail}</li>`);
+    });
+}
+
 function renderStocksGrid() {
     const grid = $('#stocksGrid');
     grid.empty();
-
-    // Sort stocks by prediction percentage
-    stocksData.sort((a, b) => b.price_change_percent - a.price_change_percent);
+    stocksData.sort((a, b) => (b.price_change_percent || 0) - (a.price_change_percent || 0));
 
     stocksData.forEach(stock => {
-        const cardHtml = `
+        grid.append(`
             <div class="col-md-6 col-lg-4 mb-4">
                 <div class="card stock-card h-100" onclick="window.location.href='/stock/${stock.symbol}'">
                     <div class="card-body">
@@ -202,59 +389,35 @@ function renderStocksGrid() {
                             </div>
                             <span class="fs-1">${stock.trend_icon}</span>
                         </div>
-
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between">
-                                <small class="text-muted">Hiện tại</small>
-                                <strong>${stock.current_price.toLocaleString()} VND</strong>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <small class="text-muted">Dự báo</small>
-                                <strong class="text-${stock.trend_color}">
-                                    ${stock.predicted_price.toLocaleString()} VND
-                                </strong>
-                            </div>
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between"><small class="text-muted">Hiện tại</small><strong>${stock.current_price.toLocaleString()} VND</strong></div>
+                            <div class="d-flex justify-content-between"><small class="text-muted">Dự báo</small><strong class="text-${stock.trend_color}">${stock.predicted_price.toLocaleString()} VND</strong></div>
                         </div>
-
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="badge bg-${stock.trend_color} fs-6">
-                                ${stock.trend}
-                            </span>
-                            <div class="text-${stock.trend_color} fw-bold">
-                                ${stock.price_change >= 0 ? '+' : ''}${stock.price_change.toLocaleString()} VND
-                                <br>
-                                <small>(${stock.price_change_percent >= 0 ? '+' : ''}${stock.price_change_percent.toFixed(2)}%)</small>
-                            </div>
+                            <span class="badge bg-${stock.trend_color}">${stock.trend}</span>
+                            <small>${stock.confidence ? 'Conf: ' + (stock.confidence * 100).toFixed(1) + '%' : 'Conf: N/A'}</small>
                         </div>
                     </div>
                 </div>
             </div>
-        `;
-
-        grid.append(cardHtml);
+        `);
     });
 }
 
-// Load data on page ready
+function formatMetric(value) {
+    if (value === null || value === undefined || value === '') return '-';
+    const num = Number(value);
+    if (Number.isNaN(num)) return '-';
+    return num.toFixed(4);
+}
+
 $(document).ready(function() {
     {% if model_loaded %}
-        loadStocksData();
+        showLoading();
+        loadDashboardData();
     {% else %}
-        showError();
-        $('#errorState .alert').html(`
-            <i class="fas fa-exclamation-triangle me-2"></i>
-            <strong>Mô hình chưa sẵn sàng:</strong> Vui lòng huấn luyện mô hình trước khi sử dụng dashboard.
-            <br><br>
-            <a href="/" class="btn btn-primary">Quay về trang chủ</a>
-        `);
+        showError('Mô hình chưa sẵn sàng.');
     {% endif %}
 });
-
-// Auto refresh every 5 minutes
-setInterval(function() {
-    if ($('#stocksGrid').is(':visible')) {
-        loadStocksData();
-    }
-}, 5 * 60 * 1000);
 </script>
 {% endblock %}
